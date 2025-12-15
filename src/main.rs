@@ -84,6 +84,9 @@ impl MotorState {
             }
         };
     }
+    fn set_motor_turning(&mut self, turn_mode: bool) {
+        self.turning = turn_mode;
+    }
 }
 
 fn setup_process_priority() -> Result<(), Box<dyn std::error::Error>> {
@@ -105,6 +108,7 @@ fn setup_process_priority() -> Result<(), Box<dyn std::error::Error>> {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut global_state: GlobalState = Default::default();
+    let mut motor_states: MotorState = Default::default();
 
     setup_process_priority()?;
 
@@ -212,10 +216,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             ),
         ],
     );
-
+    let mut vel = 0;
     loop {
         // Updating global state
-        //global_state.update();
+        global_state.update(vel, 0, (vel/1000)==0);
+        vel += 1;
 
         let cqueue_entry = ring.completion().next();
         if let Some(entry) = cqueue_entry {
@@ -253,6 +258,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     output_buf,
                                     &write_entry,
                                     global_state.clone(),
+                                    &mut motor_states
                                 )
                                 .unwrap();
 
@@ -337,7 +343,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 struct User {
     device: ethercrab::SubDevice,
     state: UserState,
-    motor_state: MotorState,
 }
 
 impl User {
@@ -345,7 +350,6 @@ impl User {
         Self {
             device,
             state: Default::default(),
-            motor_state: Default::default(),
         }
     }
 
@@ -364,6 +368,7 @@ impl User {
         output_buf: &mut [u8],
         write_entry: impl Fn(u64) -> u64,
         global_state: GlobalState,
+        motor_state: &mut MotorState,
     ) -> Result<Option<ControlFlow>, Error> {
         self.state.update(
             received,
@@ -379,7 +384,7 @@ impl User {
             output_buf,
             write_entry,
             global_state,
-            &mut self.motor_state
+            motor_state,
         )
     }
 }
@@ -492,7 +497,7 @@ impl UserState {
             Self::Idle => {
                 println!("attempting to start rx/tx");
                 use ethercrab::EtherCrabWireWrite;
-                let write_obj = WriteObj::new(0x0080, 0, 9);
+                let write_obj = WriteObj::new(0x0080, 0, 9 /* angle??? */);
                 write_obj.pack_to_slice(output_buf).unwrap();
 
                 println!("send: {output_buf:?}");
@@ -561,7 +566,7 @@ impl UserState {
                 }
 
                 use ethercrab::EtherCrabWireWrite;
-                let write_obj = WriteObj::new(ctrl, velocity, 9);
+                let write_obj = WriteObj::new(ctrl, velocity, 9 /* angle?? */);
                 write_obj.pack_to_slice(output_buf).unwrap();
                 Ok(None)
             }
