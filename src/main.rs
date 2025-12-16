@@ -108,7 +108,6 @@ fn setup_process_priority() -> Result<(), Box<dyn std::error::Error>> {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut global_state: GlobalState = Default::default();
-    let mut motor_states: MotorState = Default::default();
 
     setup_process_priority()?;
 
@@ -134,7 +133,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         panic!("readmulti/write opcodes are not supported");
     }
 
-    let mut sock = RawSocketDesc::new("enxf8edfcadd5c6")?;
+    let mut sock = RawSocketDesc::new("enx9c69d33a0dd7")?;
     //let mut sock = RawSocketDesc::new("enxf8e43bcd2609")?;
     let mtu = sock.interface_mtu()?;
 
@@ -217,13 +216,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ],
     );
     let mut vel: i32 = 0;
+    let mut num_connected = 0;
     loop {
         // Updating global state
         global_state.update(vel, 0, false);
         vel += 1;
         if vel == 25000 {
-            println!("reset velocity");
-            vel = 1;
+            vel = 25000;
         }
 
         let cqueue_entry = ring.completion().next();
@@ -248,6 +247,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         &mut pdi_offset,
                         |_maindev, subdev| (User::new(subdev), &config),
                         |maindev, dev, received, entries, ring, index, identifier, output_buf| {
+                            println!("res.identifier");
                             let flow = dev
                                 .update(
                                     received,
@@ -262,7 +262,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     output_buf,
                                     &write_entry,
                                     global_state.clone(),
-                                    &mut motor_states
                                 )
                                 .unwrap();
 
@@ -375,7 +374,6 @@ impl User {
         output_buf: &mut [u8],
         write_entry: impl Fn(u64) -> u64,
         global_state: GlobalState,
-        motor_state: &mut MotorState,
     ) -> Result<Option<ControlFlow>, Error> {
         self.state.update(
             received,
