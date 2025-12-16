@@ -219,7 +219,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut vel = 0;
     loop {
         // Updating global state
-        global_state.update(vel, 0, (vel/1000)==0);
+        global_state.update(vel, 0, false);
         vel += 1;
         if vel = 25000 {
             vel = 25000;
@@ -353,6 +353,7 @@ impl User {
         Self {
             device,
             state: Default::default(),
+            println!("New user\n");
         }
     }
 
