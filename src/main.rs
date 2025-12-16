@@ -221,6 +221,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Updating global state
         global_state.update(vel, 0, (vel/1000)==0);
         vel += 1;
+        if vel = 25000 {
+            vel = 25000;
+        }
 
         let cqueue_entry = ring.completion().next();
         if let Some(entry) = cqueue_entry {
@@ -497,7 +500,7 @@ impl UserState {
             Self::Idle => {
                 println!("attempting to start rx/tx");
                 use ethercrab::EtherCrabWireWrite;
-                let write_obj = WriteObj::new(0x0080, 0, 9 /* angle??? */);
+                let write_obj = WriteObj::new(0x0080, 0, 9);
                 write_obj.pack_to_slice(output_buf).unwrap();
 
                 println!("send: {output_buf:?}");
@@ -566,7 +569,7 @@ impl UserState {
                 }
 
                 use ethercrab::EtherCrabWireWrite;
-                let write_obj = WriteObj::new(ctrl, velocity, 9 /* angle?? */);
+                let write_obj = WriteObj::new(ctrl, velocity, 9);
                 write_obj.pack_to_slice(output_buf).unwrap();
                 Ok(None)
             }
