@@ -221,7 +221,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Updating global state
         global_state.update(vel, 0, false);
         vel += 1;
-        if vel = 25000 {
+        if vel == 25000 {
             vel = 25000;
         }
 
@@ -350,10 +350,10 @@ struct User {
 
 impl User {
     fn new(device: ethercrab::SubDevice) -> Self {
+        println!("new user");
         Self {
             device,
             state: Default::default(),
-            println!("New user\n");
         }
     }
 
