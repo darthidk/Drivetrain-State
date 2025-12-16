@@ -550,13 +550,13 @@ impl UserState {
 
                 let step = *step;
                 let (ctrl, mut velocity) = if step < 500 {
-                    (0x0080, motor_state.vel.clone())
+                    (0x0080, 0)
                 } else if step < 1500 {
-                    (0x0006, motor_state.vel.clone())
+                    (0x0006, 0)
                 } else if step < 2500 {
-                    (0x0007, motor_state.vel.clone())
+                    (0x0007, 0)
                 } else if step < 3500 {
-                    (0x000F, motor_state.vel.clone())
+                    (0x000F, 0)
                 } else {
                     (0x000F, motor_state.vel.clone())
                 };
