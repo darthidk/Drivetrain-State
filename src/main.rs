@@ -216,13 +216,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             ),
         ],
     );
-    let mut vel = 0;
+    let mut vel: i32 = 0;
     loop {
         // Updating global state
         global_state.update(vel, 0, false);
         vel += 1;
         if vel == 25000 {
-            vel = 25000;
+            println!("reset velocity");
+            vel = 1;
         }
 
         let cqueue_entry = ring.completion().next();
@@ -346,6 +347,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 struct User {
     device: ethercrab::SubDevice,
     state: UserState,
+    motor_state: MotorState,
 }
 
 impl User {
@@ -354,6 +356,7 @@ impl User {
         Self {
             device,
             state: Default::default(),
+            motor_state: Default::default(),
         }
     }
 
@@ -388,7 +391,7 @@ impl User {
             output_buf,
             write_entry,
             global_state,
-            motor_state,
+            &mut self.motor_state,
         )
     }
 }
