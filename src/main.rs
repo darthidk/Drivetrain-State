@@ -215,15 +215,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             ),
         ],
     );
-    let mut vel: i32 = 0;
+    //let mut vel: i32 = 0;
+    let vel: i32 = 25000;
     let mut num_connected = 0;
     loop {
         // Updating global state
-        global_state.update(vel, 0, false);
-        vel += 1;
-        if vel == 25000 {
-            vel = 25000;
-        }
 
         let cqueue_entry = ring.completion().next();
         if let Some(entry) = cqueue_entry {
@@ -247,7 +243,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         &mut pdi_offset,
                         |_maindev, subdev| (User::new(subdev), &config),
                         |maindev, dev, received, entries, ring, index, identifier, output_buf| {
-                            println!("res.identifier");
+                            println!("{:?}", res.identifier);
                             let flow = dev
                                 .update(
                                     received,
